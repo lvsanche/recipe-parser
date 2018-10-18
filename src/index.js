@@ -1,17 +1,24 @@
-import * as convert from './convert';
-import { units, pluralUnits } from './units';
-import { repeatingFractions } from './repeatingFractions';
-import * as Natural from 'natural';
+//import * as convert from './convert';
+var convert = require('./convert');
+
+//import { units, pluralUnits } from './units';
+var allUnits = require('./units');
+var units = allUnits.units;
+var pluralUnits = allUnits.pluralUnits;
+var repeatingFractions = require('./repeatingFractions')
+//import { repeatingFractions } from './repeatingFractions';
+//import * as Natural from 'natural';
+var Natural = require('natural');
 
 const nounInflector = new Natural.NounInflector();
 
-export interface Ingredient {
-  ingredient: string;
-  quantity: string | null;
-  unit: string | null;
-}
+// export interface Ingredient {
+//   ingredient: string;
+//   quantity: string | null;
+//   unit: string | null;
+// }
 
-function getUnit(input: string) {
+function getUnit(input) {
   if (units[input] || pluralUnits[input]) {
     return [input];
   }
@@ -30,10 +37,10 @@ function getUnit(input: string) {
   return [];
 }
 
-export function parse(recipeString: string) {
+function parse(recipeString) {
   const ingredientLine = recipeString.trim();
 
-  let [quantity, noQuantity] = convert.findQuantityAndConvertIfUnicode(ingredientLine) as string[];
+  let [quantity, noQuantity] = convert.findQuantityAndConvertIfUnicode(ingredientLine);//as string[];
 
   quantity = convert.convertFromFraction(quantity);
 
@@ -43,7 +50,7 @@ export function parse(recipeString: string) {
     noQuantity = noQuantity.replace(extraInfo, '').trim();
   }
 
-  const [unit, shorthand] = getUnit(noQuantity.split(' ')[0]) as string[];
+  const [unit, shorthand] = getUnit(noQuantity.split(' ')[0]); //as string[];
   const ingredient = !!shorthand ? noQuantity.replace(shorthand, '').trim() : noQuantity.replace(unit, '').trim();
 
   return {
@@ -53,25 +60,25 @@ export function parse(recipeString: string) {
   };
 }
 
-export function combine(ingredientArray: Ingredient[]) {
+function combine(ingredientArray) {
   const combinedIngredients = ingredientArray.reduce((acc, ingredient) => {
     const key = ingredient.ingredient + ingredient.unit; // when combining different units, remove this from the key and just use the name
     const existingIngredient = acc[key];
 
     if (existingIngredient) {
-      return Object.assign(acc, { [key]: combineTwoIngredients(existingIngredient, ingredient) });
+      return Object.assign(acc, combineTwoIngredients(existingIngredient, ingredient) );
     } else {
-      return Object.assign(acc, { [key]: ingredient });
+      return Object.assign(acc, {});
     }
-  }, {} as { [key: string]: Ingredient });
+  })
 
   return Object.keys(combinedIngredients).reduce((acc, key) => {
     const ingredient = combinedIngredients[key];
     return acc.concat(ingredient);
-  }, [] as Ingredient[]).sort(compareIngredients);
+  }).sort(compareIngredients);
 }
 
-export function prettyPrintingPress(ingredient: Ingredient) {
+function prettyPrintingPress(ingredient) {
   let quantity = '';
   let unit = ingredient.unit;
   if (ingredient.quantity) {
@@ -108,7 +115,7 @@ export function prettyPrintingPress(ingredient: Ingredient) {
   return `${quantity}${unit ? ' ' + unit : ''} ${ingredient.ingredient}`;
 }
 
-function gcd(a: number, b: number): number {
+function gcd(a, b) {
   if (b < 0.0000001) {
     return a;
   }
@@ -116,15 +123,21 @@ function gcd(a: number, b: number): number {
   return gcd(b, Math.floor(a % b));
 }
 
-// TODO: Maybe change this to existingIngredients: Ingredient | Ingredient[]
-function combineTwoIngredients(existingIngredients: Ingredient, ingredient: Ingredient): Ingredient {
+//TODO: Maybe change this to existingIngredients: Ingredient | Ingredient[]
+function combineTwoIngredients(existingIngredients, ingredient) {
   const quantity = existingIngredients.quantity && ingredient.quantity ? (Number(existingIngredients.quantity) + Number(ingredient.quantity)).toString() : null;
   return Object.assign({}, existingIngredients, { quantity });
 }
 
-function compareIngredients(a: Ingredient, b: Ingredient) {
+function compareIngredients(a, b) {
   if (a.ingredient === b.ingredient) {
     return 0;
   }
   return a.ingredient < b.ingredient ? -1 : 1;
+}
+
+module.exports = {
+  parse: parse,
+  prettyPrintingPress: prettyPrintingPress,
+  combine: combine
 }

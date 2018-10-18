@@ -1,4 +1,4 @@
-export function convertFromFraction(value: string) {
+function convertFromFraction(value) {
   // number comes in -> 1 1/3
   if (value && value.split(' ').length > 1) {
     const [whole, fraction] = value.split(' ');
@@ -14,12 +14,12 @@ export function convertFromFraction(value: string) {
   }
 }
 
-export function getFirstMatch(line: string, regex: RegExp) {
+ function getFirstMatch(line, regex) {
   const match = line.match(regex);
   return (match && match[0]) || '';
 }
 
-const unicodeObj: { [key: string]: string } = {
+const unicodeObj = {
   '¼': '1/4',
   '½': '1/2',
   '¾': '3/4',
@@ -40,7 +40,7 @@ const unicodeObj: { [key: string]: string } = {
   '⅞': '7/8'
 };
 
-export function findQuantityAndConvertIfUnicode(ingredientLine: string) {
+function findQuantityAndConvertIfUnicode(ingredientLine) {
   const numericAndFractionRegex = /^(\d+\/\d+)|(\d+\s\d+\/\d+)|(\d+\-\d+)|(\d+.\d+)|\d+/g;
   const unicodeFractionRegex = /\d*[^\u0000-\u007F]+/g;
   const onlyUnicodeFraction = /[^\u0000-\u007F]+/g;
@@ -58,7 +58,14 @@ export function findQuantityAndConvertIfUnicode(ingredientLine: string) {
   return [null, ingredientLine];
 }
 
-function keepThreeDecimals(val: number) {
+function keepThreeDecimals(val) {
   const strVal = val.toString();
   return strVal.split('.')[0] + '.' + strVal.split('.')[1].substring(0, 3);
+}
+
+module.exports = {
+  convertFromFraction: convertFromFraction,
+  findQuantityAndConvertIfUnicode: findQuantityAndConvertIfUnicode,
+  keepThreeDecimals: keepThreeDecimals,
+  getFirstMatch: getFirstMatch
 }

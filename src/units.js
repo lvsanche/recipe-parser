@@ -1,22 +1,23 @@
-export const units = {
+const units = {
   cup: ['c', 'c.', 'C', 'Cups'],
   gallon: ['gal'],
   ounce: ['oz', 'oz.'],
   pint: ['pt', 'pts', 'pt.'],
   pound: ['lb', 'lb.', 'lbs'],
   quart: ['qt', 'qt.', 'qts'],
-  tablespoon: ['tbs', 'tbsp', 'tbspn', 'T', 'T.', 'Tablespoons', 'Tablespoon'],
-  teaspoon: ['tsp', 'tspn', 't', 't.'],
+  tablespoon: ['tbs', 'tbsp', 'tbspn', 'T', 'T.', 'Tablespoons', 'Tablespoon', 'Tbsp.', 'tbsp.'],
+  teaspoon: ['tsp', 'tspn', 't', 't.', 'tsp.'],
   gram: ['g', 'g.'],
   kilogram: ['kg', 'kg.'],
   liter: ['l', 'l.'],
   milligram: ['mg', 'mg.'],
   milliliter: ['ml', 'ml.'],
   package: ['pkg', 'pkgs'],
-  stick: ['sticks']
-} as { [key: string]: string[] };
+  stick: ['sticks'],
+  clove: ['cloves'],
+};
 
-export const pluralUnits = {
+const pluralUnits = {
   cup: 'cups',
   gallon: 'gallons',
   ounce: 'ounces',
@@ -35,5 +36,12 @@ export const pluralUnits = {
   box: 'boxes',
   pinch: 'pinches',
   can: 'cans',
-  slice: 'slices'
-} as { [key: string]: string };
+  slice: 'slices',
+  sprig: 'sprigs',
+  clove: 'cloves'
+};
+
+module.exports = {
+  units: units,
+  pluralUnits: pluralUnits
+}
