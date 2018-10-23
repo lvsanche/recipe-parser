@@ -1,22 +1,12 @@
-//import * as convert from './convert';
 var convert = require('./convert');
-
-//import { units, pluralUnits } from './units';
 var allUnits = require('./units');
 var units = allUnits.units;
 var pluralUnits = allUnits.pluralUnits;
-var repeatingFractions = require('./repeatingFractions')
-//import { repeatingFractions } from './repeatingFractions';
-//import * as Natural from 'natural';
+var convertUnits = allUnits.convertUnits;
+var repeatingFractions = require('./repeatingFractions');
 var Natural = require('natural');
 
 const nounInflector = new Natural.NounInflector();
-
-// export interface Ingredient {
-//   ingredient: string;
-//   quantity: string | null;
-//   unit: string | null;
-// }
 
 function getUnit(input) {
   if (units[input] || pluralUnits[input]) {
@@ -41,7 +31,7 @@ function parse(recipeString) {
   const ingredientLine = recipeString.trim();
 
   let [quantity, noQuantity] = convert.findQuantityAndConvertIfUnicode(ingredientLine);//as string[];
-
+  
   quantity = convert.convertFromFraction(quantity);
 
   let extraInfo;
@@ -49,8 +39,9 @@ function parse(recipeString) {
     extraInfo = convert.getFirstMatch(noQuantity, /\(([^\)]+)\)/);
     noQuantity = noQuantity.replace(extraInfo, '').trim();
   }
-
+  
   const [unit, shorthand] = getUnit(noQuantity.split(' ')[0]); //as string[];
+  
   const ingredient = !!shorthand ? noQuantity.replace(shorthand, '').trim() : noQuantity.replace(unit, '').trim();
 
   return {
@@ -62,20 +53,21 @@ function parse(recipeString) {
 
 function combine(ingredientArray) {
   const combinedIngredients = ingredientArray.reduce((acc, ingredient) => {
-    const key = ingredient.ingredient + ingredient.unit; // when combining different units, remove this from the key and just use the name
+    const key = ingredient.ingredient // when combining different units, remove this from the key and just use the name
+    
     const existingIngredient = acc[key];
-
+  
     if (existingIngredient) {
-      return Object.assign(acc, combineTwoIngredients(existingIngredient, ingredient) );
+      return Object.assign(acc, { [key]: combineTwoIngredients(existingIngredient, ingredient) });
     } else {
-      return Object.assign(acc, {});
+      return Object.assign(acc, {[key]: ingredient});
     }
-  })
-
+  }, {})
+  
   return Object.keys(combinedIngredients).reduce((acc, key) => {
     const ingredient = combinedIngredients[key];
     return acc.concat(ingredient);
-  }).sort(compareIngredients);
+  }, []).sort(compareIngredients);
 }
 
 function prettyPrintingPress(ingredient) {
@@ -123,10 +115,43 @@ function gcd(a, b) {
   return gcd(b, Math.floor(a % b));
 }
 
-//TODO: Maybe change this to existingIngredients: Ingredient | Ingredient[]
+
 function combineTwoIngredients(existingIngredients, ingredient) {
-  const quantity = existingIngredients.quantity && ingredient.quantity ? (Number(existingIngredients.quantity) + Number(ingredient.quantity)).toString() : null;
-  return Object.assign({}, existingIngredients, { quantity });
+  //must make sure that units work
+  var quantity;
+  var unit;
+  if ( existingIngredients.unit !== ingredient.unit){
+    if ( existingIngredients.unit === 'cup' && (ingredient.unit === 'tablespoon' || ingredient.unit === 'teaspoon')){
+      quantity = (Number(convertUnits(ingredient, 'cup').quantity) + Number(existingIngredients.quantity)).toString();
+      unit = 'cup';
+    }
+    else if (ingredient.unit === 'cup' && (existingIngredients.unit === 'tablespoon' || existingIngredients.unit === 'teaspoon')){
+      quantity = (Number(convertUnits(existingIngredients, 'cup').quantity) + Number(ingredient.quantity)).toString();
+      unit = 'cup';
+    }
+    else if (existingIngredients.unit === 'tablespoon' && ingredient.unit === 'teaspoon'){
+      quantity = (Number(convertUnits(ingredient, 'tablespoon').quantity) + Number(existingIngredients.quantity)).toString();
+      unit = 'tablespoon';
+    }
+    else if ( ingredient.unit === 'tablespoon' && existingIngredients.unit === 'teaspoon'){
+      quantity = (Number(convertUnits(existingIngredients, 'tablespoon').quantity) + Number(ingredient.quantity)).toString();
+      unit = 'tablespoon';
+    }
+    else {
+      //means there was no quantity
+      quantity = null;
+    }
+  }
+  else if ( existingIngredients.quantity === ingredient.quantity && ingredient.quantity === null){
+    quantity = null;
+    unit = null;
+  }
+  else {
+    quantity = (Number(ingredient.quantity) + Number(existingIngredients.quantity)).toString();
+    unit = existingIngredients.unit;
+  }
+
+  return Object.assign({}, existingIngredients, { quantity, unit});
 }
 
 function compareIngredients(a, b) {
@@ -139,5 +164,6 @@ function compareIngredients(a, b) {
 module.exports = {
   parse: parse,
   prettyPrintingPress: prettyPrintingPress,
-  combine: combine
+  combine: combine,
+  combineTwoIngredients: combineTwoIngredients
 }

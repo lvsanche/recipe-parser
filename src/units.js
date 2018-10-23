@@ -13,8 +13,9 @@ const units = {
   milligram: ['mg', 'mg.'],
   milliliter: ['ml', 'ml.'],
   package: ['pkg', 'pkgs'],
-  stick: ['sticks'],
-  clove: ['cloves'],
+  stick: ['sticks', 'stick'],
+  sprig: ['sprigs', 'sprig', 'long sprigs'],
+  clove: ['cloves', 'clove'],
 };
 
 const pluralUnits = {
@@ -41,7 +42,58 @@ const pluralUnits = {
   clove: 'cloves'
 };
 
+const unitEquivalence = {
+  cup: {
+    tablespoon: 16,
+    teaspoon: 48,
+    liter: 0.236588,
+    ounce: 8,
+    'fluid ounce': 8,
+    pint: 0.5,
+    milliliter: 236.588
+  },
+  tablespoon: {
+    cup: 0.0625,
+    teaspoon: 3,
+    ounce: 0.5,
+    "fluid ounce": 0.5,
+    milliliter: 14.7868,
+  },
+  teaspoon: {
+    cup: 0.0205,
+    tablespoon: 0.3333,
+    milliliter: 4.9289
+  }
+}
+
+//unit will be the final changed unit
+const changeUnitTo = (ingredient, unit) => {
+  return Object.assign( {}, ingredient, 
+    {
+      unit: unit,
+      quantity: (unitEquivalence[ingredient.unit][unit] * Number(ingredient.quantity)).toString()
+    }
+  )
+}
+
+/**
+ * Volume:
+ *  Cup = 
+ *    0.0625 gallons
+ *    16 tablespoons
+ *    48 teaspoons
+ *    0.236588 liters
+ *    8 fluid oz
+ * 
+ *  Gallon = 
+ *    120 fluid oz (fl)
+ *    3.785 liters
+ *    16 cups
+ * 
+ */
+
 module.exports = {
   units: units,
-  pluralUnits: pluralUnits
+  pluralUnits: pluralUnits,
+  convertUnits: changeUnitTo
 }
