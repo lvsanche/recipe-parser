@@ -48,13 +48,18 @@ function findQuantityAndConvertIfUnicode(ingredientLine) {
   if (ingredientLine.match(unicodeFractionRegex)) {
     const numericPart = getFirstMatch(ingredientLine, numericAndFractionRegex);
     const unicodePart = getFirstMatch(ingredientLine, numericPart ? onlyUnicodeFraction : unicodeFractionRegex);
+
     if (unicodeObj[unicodePart]) {
       return [`${numericPart} ${unicodeObj[unicodePart]}`, ingredientLine.replace(getFirstMatch(ingredientLine, unicodeFractionRegex), '').trim()];
     }
   }
+
   if (ingredientLine.match(numericAndFractionRegex)) {
+    debugger;
     return [ingredientLine.match(numericAndFractionRegex) && getFirstMatch(ingredientLine, numericAndFractionRegex), ingredientLine.replace(getFirstMatch(ingredientLine, numericAndFractionRegex), '').trim()];
   }
+
+  debugger;
   return [null, ingredientLine];
 }
 

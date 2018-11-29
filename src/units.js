@@ -16,6 +16,11 @@ const units = {
   stick: ['sticks', 'stick'],
   sprig: ['sprigs', 'sprig', 'long sprigs'],
   clove: ['cloves', 'clove'],
+  large: ["large"],
+  medium: ["medium"],
+  small: ["small"],
+  half: ["half"],
+  inch: ['inch', '"']
 };
 
 const pluralUnits = {

@@ -29,7 +29,7 @@ function getUnit(input) {
 
 function parse(recipeString) {
   const ingredientLine = recipeString.trim();
-
+  
   let [quantity, noQuantity] = convert.findQuantityAndConvertIfUnicode(ingredientLine);//as string[];
   
   quantity = convert.convertFromFraction(quantity);
@@ -39,7 +39,7 @@ function parse(recipeString) {
     extraInfo = convert.getFirstMatch(noQuantity, /\(([^\)]+)\)/);
     noQuantity = noQuantity.replace(extraInfo, '').trim();
   }
-  
+  // console.log(noQuantity);
   const [unit, shorthand] = getUnit(noQuantity.split(' ')[0]); //as string[];
   
   const ingredient = !!shorthand ? noQuantity.replace(shorthand, '').trim() : noQuantity.replace(unit, '').trim();
@@ -163,6 +163,7 @@ function compareIngredients(a, b) {
 
 module.exports = {
   parse: parse,
+  getUnit: getUnit,
   prettyPrintingPress: prettyPrintingPress,
   combine: combine,
   combineTwoIngredients: combineTwoIngredients
