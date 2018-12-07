@@ -151,6 +151,15 @@ function combineTwoIngredients(existingIngredients, ingredient) {
     unit = existingIngredients.unit;
   }
 
+  //time to make sure units are not too long
+  if( quantity ){
+    var aQua = quantity.split('.');
+    if ( aQua[1].length > 3){
+      quantity = aQua[0] + '.' + aQua[1].substr(0,3);
+    }
+  }
+  
+
   return Object.assign({}, existingIngredients, { quantity, unit});
 }
 
